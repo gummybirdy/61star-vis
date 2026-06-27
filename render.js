@@ -9,7 +9,7 @@ jitterRate = 10; // format is [xMin, xMax], [yMin, yMax]
 jitterMod = 2;
 
 jitterRate1 = jitterRate * jitterMod;
-jitterRate2 = jitterRate * jitterMod ** 2;
+jitterRate2 = jitterRate * jitterMod * jitterMod;
 
 jitterGlyph = [[jitterRate, jitterRate], [jitterRate, jitterRate]];
 jitterStar1 = [[jitterRate1, jitterRate1], [jitterRate1, jitterRate1]];
@@ -49,7 +49,7 @@ const brownianVib = (points, lastPoints, jitter) => { // points: array of points
 	
 	return newPoints;
 }
-const update = () => { // updates the frame, draws everything
+const update = (repeat) => { // updates the frame, draws everything
 	// clear the canvas
 	ctx.beginPath();
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -71,12 +71,60 @@ const update = () => { // updates the frame, draws everything
 	star2PtsD = drawShape(brownianVib(star2Pts, star2PtsD, jitterGlyph)); // i #1 star
 	star3PtsD = drawShape(brownianVib(star3Pts, star3PtsD, jitterGlyph)); // i #2 star
 	
-	setTimeout(() => {
-		requestAnimationFrame(update);
-	}, 100);
+	if (repeat){
+		setTimeout(() => {
+			requestAnimationFrame(update);
+		}, 100);
+	}
 }
 
-// onmousemove = function(e){console.log("mouse location:", e.clientX - 210, e.clientY - 16)} // shows (roughly) mouse pointer position in canvas; saves a lot of headache
+document.addEventListener('keydown', (event) => {
+	// "r" for "red"
+	if (event.key === "r") {
+		ctx.strokeStyle = "red";
+		update(false);
+		setTimeout(() => {
+			ctx.strokeStyle = "white";
+		}, 400);
+	}
+	
+	// "b" for "boom"
+	if (event.key === "b") {
+		bMod = jitterMod * jitterMod;
+		glyphRate = jitterRate * bMod;
+		starRate = jitterRate1 * bMod;
+		starRate2 = jitterRate2 * bMod;
+		jitterGlyph = [[glyphRate, glyphRate], [glyphRate, glyphRate]];
+		jitterStar1 = [[starRate, starRate], [starRate, starRate]];
+		jitterStar2 = [[starRate2, starRate2], [starRate2, starRate2]];
+		update(false);
+		setTimeout(() => {
+			bMod = jitterMod * jitterMod * jitterMod;
+			glyphRate = jitterRate * bMod;
+			starRate = jitterRate1 * bMod;
+			starRate2 = jitterRate2 * bMod;
+			jitterGlyph = [[glyphRate, glyphRate], [glyphRate, glyphRate]];
+			jitterStar1 = [[starRate, starRate], [starRate, starRate]];
+			jitterStar2 = [[starRate2, starRate2], [starRate2, starRate2]];
+			update(false);
+		}, 100);
+		setTimeout(() => {
+			bMod = jitterMod * jitterMod;
+			glyphRate = jitterRate * bMod;
+			starRate = jitterRate1 * bMod;
+			starRate2 = jitterRate2 * bMod;
+			jitterGlyph = [[glyphRate, glyphRate], [glyphRate, glyphRate]];
+			jitterStar1 = [[starRate, starRate], [starRate, starRate]];
+			jitterStar2 = [[starRate2, starRate2], [starRate2, starRate2]];
+			update(false);
+		}, 200);
+		setTimeout(() => {
+			jitterGlyph = [[jitterRate, jitterRate], [jitterRate, jitterRate]];
+			jitterStar1 = [[jitterRate1, jitterRate1], [jitterRate1, jitterRate1]];
+			jitterStar2 = [[jitterRate2, jitterRate2], [jitterRate2, jitterRate2]];
+		}, 300);
+	}
+});
 
 // define glyphs in points
 // letters/numbers
@@ -275,4 +323,4 @@ ctx.strokeStyle = "white";
 ctx.lineWidth = 2;
 ctx.imageSmoothingEnabled = false;
 
-update();
+update(true);
